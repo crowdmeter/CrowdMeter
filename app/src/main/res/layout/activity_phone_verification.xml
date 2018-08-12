@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/phonebackgroundLayout"
+    android:background="#ffffff"
+    android:fillViewport="true"
+    tools:context=".PhoneVerification">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+    <ImageView
+        android:id="@+id/sp1"
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/logo"
+        android:layout_width="100dp"
+        android:layout_height="100dp" />
+
+    <LinearLayout
+        android:id="@+id/LoginTextLayout"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="16sp"
+        android:layout_marginEnd="16sp"
+        android:orientation="vertical"
+        android:layout_below="@+id/sp1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Verify Your Phone Number"
+            android:textSize="18sp"
+            android:padding="8dp"
+            android:gravity="center"
+            android:textColor="@color/colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/phoneLayout"
+        android:layout_below="@+id/LoginTextLayout"
+        android:layout_marginTop="24sp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.hbb20.CountryCodePicker
+            android:id="@+id/ccp"
+            app:ccp_defaultNameCode="IN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </com.hbb20.CountryCodePicker>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_gravity="center"
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:background="?android:attr/listDivider" />
+
+        <EditText
+            android:id="@+id/phoneEt"
+            android:layout_marginStart="8dp"
+            android:hint="Phone Number"
+            android:gravity="start"
+            android:inputType="phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:visibility="invisible"
+        android:id="@+id/verificationLayout"
+        android:layout_marginTop="16sp"
+        android:layout_below="@+id/phoneLayout"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/verificationEt"
+            android:hint="Verification Code"
+            android:inputType="number"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/timerLayout"
+        android:visibility="gone"
+        android:layout_below="@+id/verificationLayout"
+        android:gravity="center_horizontal"
+        android:layout_margin="16sp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="( Auto Verifying Code in : "
+            android:layout_gravity="end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:gravity="start"
+            android:id="@+id/timerText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="invisible"
+        android:id="@+id/resendLayout"
+        android:gravity="center"
+        android:layout_below="@+id/timerLayout"
+        android:layout_margin="16sp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Didn't receive the code, "
+            android:textColor="@android:color/black"
+            android:padding="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/resendText"
+            android:padding="4dp"
+            android:text="Resend"
+            android:textColor="@android:color/holo_red_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/PhoneprogressBar"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/resendLayout"
+        android:theme="@style/WhiteAccent"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    <Button
+        android:background="@drawable/border"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="Send Code"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        android:id="@+id/sendSmsButton"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+    </RelativeLayout>
+
+</ScrollView>

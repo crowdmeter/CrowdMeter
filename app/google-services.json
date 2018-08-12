@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "657812387606",
+    "firebase_url": "https://crowdmeter-8b6c7.firebaseio.com",
+    "project_id": "crowdmeter-8b6c7",
+    "storage_bucket": "crowdmeter-8b6c7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657812387606:android:488816ca0e16fc0f",
+        "android_client_info": {
+          "package_name": "com.crowdmeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "657812387606-gmi2og3skq8l6vk41ea4l4tpkr3ivkba.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crowdmeter",
+            "certificate_hash": "2bb4afc07210e3aea3ccd4c0eb069cdeb6a7b00e"
+          }
+        },
+        {
+          "client_id": "657812387606-584ldkin31hfgn16nerk40t5rfsu227l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.crowdmeter",
+            "certificate_hash": "e0afd699d02b8159db4f4430da665f395387b1fc"
+          }
+        },
+        {
+          "client_id": "657812387606-c947lbj7pptfqf8r45o718ur0q2tpnq3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnrR5WJ1mQcyThg3cA58in1zFEuNSbIQA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "657812387606-c947lbj7pptfqf8r45o718ur0q2tpnq3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
