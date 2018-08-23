@@ -65,29 +65,32 @@ public class HomeFragment extends Fragment {
         progressDialog1 = new ProgressDialog(getContext());
         noPollsTv = view.findViewById(R.id.noPollsTv);
 
-
-      /*  if(MyPreferences.getAddress(getContext())==null){
-            getPolls();
-        }else {
-            getPolls();
-        }
-*/
-
+        // Retreive all polls stored in firebase once the app starts
         getPolls();
 
         return view;
     }
 
+
+
+    // Retreive all polls stored in firebase once the app starts
+
     private void getPolls() {
-        mPolls = new ArrayList<>();
-        mTitles = new ArrayList<>();
-        map = new HashMap<>();
-        titlemap = new HashMap<>();
+        mPolls = new ArrayList<>();             //list that stores all the quesions
+        mTitles = new ArrayList<>();            // list that stores all the titles
+        map = new HashMap<>();                  //key- question and value - options for that question
+        titlemap = new HashMap<>();                  // key - poll question and value - poll title; used to retreive title for any quesiong or vice-versa
         final Map<String,String> titleQuesmap = new HashMap<>();
 
-        boolean isNew = MyPreferences.getisNewPoll(getContext());
+        boolean isNew = MyPreferences.getisNewPoll(getContext()); // check whether a new poll is added
+
+        //check whether all polls are stored locally and whether its a new poll
+        // if not stored locally --> retreive and store locally
+
 
         if (!(MyPreferences.getAllPolls(getContext()).isEmpty()) && !(MyPreferences.getAllPolls(getContext()) == null) && !refresh && !isNew) {
+
+            // already stored locally, just get the values from sharedPreferences
 
             map = MyPreferences.getAllPolls(getContext());
             mPolls = new ArrayList<String>(map.keySet());
@@ -104,23 +107,28 @@ public class HomeFragment extends Fragment {
             progressDialog1.show();
 
 
+            // Get all polls stored under "Polls" in Firebase i.e. title, pollquestion and options
+
             mDatabaseRef.child("Polls").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     progressDialog1.dismiss();
 
                     if (!dataSnapshot.exists()) {
-                        noPollsTv.setVisibility(View.VISIBLE);
+                        noPollsTv.setVisibility(View.VISIBLE); // if no poll available, show no poll textview
                     } else {
                         noPollsTv.setVisibility(View.GONE);
                         for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
 
                             try {
+
+                                // get all poll question and it's respective title and options and store it locally
+
                                 String s = postSnapshot.getKey(); //pollquestion
 
                                 Map<String, Object> val = (Map<String, Object>) postSnapshot.getValue();
 
-                                List<String> op = (List<String>) val.get("options");
+                                List<String> op = (List<String>) val.get("options");    //poll options
                                 String title = String.valueOf(val.get("title"));
                                 mTitles.add(title);
                                 Log.i("mac", "oplist: " + Objects.requireNonNull(op).toString());
@@ -136,11 +144,15 @@ public class HomeFragment extends Fragment {
                             }
                         }
 
+                        // store all the retreived values from respective maps to sharedPref
+
                         MyPreferences.setAllPolls(getContext(), map);
                         MyPreferences.setTitle(getContext(), titlemap);
                        // MyPreferences.setTitleList(getContext(),mTitles);
                        // MyPreferences.setTitleQuestion(getContext(),titleQuesmap);
 
+
+                        // set the adapter for recycler view that show all the tiles and pass the list of questions and titles as arguement
 
                         mPollAdapter = new PollAdapter(getContext(), mPolls, mTitles);
                         mPollRecyclerView.setAdapter(mPollAdapter);
@@ -149,6 +161,8 @@ public class HomeFragment extends Fragment {
 
                     }
                 }
+
+                //handle the error during retreival
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {

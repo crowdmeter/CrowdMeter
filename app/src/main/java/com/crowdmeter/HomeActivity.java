@@ -69,6 +69,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean canStartMap = false;
 
+
+    //time period for retreiving results from Firebase for each item
+
     private long timeperiod = 30 * 60 * 1000;
     private long raintimeperiod = 3 * 60 * 60 * 1000;
     private long traffictimeperiod = 30 * 60 * 1000;
@@ -76,7 +79,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private long accidenttimeperiod = 2 * 60 * 60 * 1000;
     private long powercuttimeperiod = 1 * 60 * 60 * 1000;
     private long roadqualitytimeperiod = 24 * 60 * 60 * 1000;
-    ;
 
     private long displaytimeperiod = 15 * 60 * 1000;
 
@@ -84,7 +86,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<String> mTitles;
     private MapFragment mfrag;
 
-    public final static String adminNumber = "+917073204933";
+    public final static String adminNumber = "+917073204933"; //change admin number to get addpoll option in menu
 
     private DatabaseReference mDatabaseRef;
     private FirebaseAuth firebaseAuth;
@@ -103,6 +105,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
 
+        // check for current user, if logged in get user's number and user's unique uid(which is provided by firebase to unique identification)
+
         if (firebaseAuth.getCurrentUser() == null) {
             startActivity(new Intent(this, PhoneVerification.class));
             finish();
@@ -110,6 +114,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             currUser = firebaseAuth.getCurrentUser().getUid();
             currNumber = firebaseAuth.getCurrentUser().getPhoneNumber();
         }
+
+        // set up toolbar and navigation drawer menu
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -139,6 +145,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
 
     }
+
+    // home fragment displays all the card layout on the first screen
 
     private void startHomeFragment() {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -208,6 +216,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+
+    // setUpOptions() takes the title (for eg: Rain) as arguement and uses this to set up current poll question and its options.
+    // it calls getDatabaseValues() after the setup.
+
     private void setUpOptions(String title) {
         Map<String, String> tmap = MyPreferences.getTitle(this);
         String ques = getKeyFromValue(tmap, title);
@@ -232,6 +244,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return null;
     }
 
+
+    // code for dynamically adding menu items in navigation drawer ---> not used here
     public void addMenuItem() {
         Menu menu = navigationView.getMenu();
         List<String> t = MyPreferences.getTitleList(getApplicationContext());
@@ -253,15 +267,22 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
+    /* onBackPressed() used to control how app behaves on backpress.
+       1. if navigation drawer in open -> close it
+       2. if mapview is open --> return back to home fragment which has all the tiles
+       3. if on homefragment --> double click to exit app
+    */
+
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+            drawer.closeDrawer(GravityCompat.START);                                                // 1
         } else {
             FragmentManager fm = getSupportFragmentManager();
             Fragment f = fm.findFragmentById(R.id.fragment_container);
 
-            if (f instanceof HomeFragment) {
+            if (f instanceof HomeFragment) {                                                        //3
                 backPressedCount++;
                 if (backPressedCount == 1) {
                     Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
@@ -271,7 +292,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     super.onBackPressed();
                 }
 
-            } else if (f instanceof MapFragment) {
+            } else if (f instanceof MapFragment) {                                                  //2
                 backPressedCount = 0;
                 startHomeFragment();
 
@@ -283,6 +304,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    //used to retreive all the votes casted by user for a particular question in a timeperiod defined above
+
     public void getDatabaseValues() {
         MyPreferences.setHasPolled(this, false);
 
@@ -290,10 +313,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         final String date = df.format(Calendar.getInstance().getTime());
         //Log.i("mac","date:"+date);
 
+
+        //get title using poll question
+
         Map<String, String> titlemap = MyPreferences.getTitle(this);
         String q = MyPreferences.getPollQues(this);
         String title = titlemap.get(q);
         long period;
+
+
+        // set up timeperiod according to selected quesion/title
 
         switch (title) {
             case "Rain":
@@ -319,10 +348,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
 
+
+        // calc starttime after which the results are to be retreived
+
         final long currtime = System.currentTimeMillis();
         long starttime = currtime - period;
         Log.i("mac", "currtime: " + currtime);
         Log.i("mac", "starttime: " + starttime);
+
+
+        // lists for storing all lat-lan and their respective responses
 
         final List<LatLng> mylist = new ArrayList<>();
         final List<String> responselist = new ArrayList<>();
@@ -331,6 +366,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         progressDialog.setMessage("Please wait...");
         progressDialog.setCancelable(false);
         progressDialog.show();
+
+
+        /* Access PollResults->PollQuestion->timestamp
+           order it by timestamp and use startAt to retreive the values only after start time
+        */
+
 
         mDatabaseRef.child("PollResults")
                 .child(MyPreferences.getPollQues(this))
@@ -360,9 +401,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                                 Log.i("mac", "timediff: " + timediff);
                                 Log.i("mac", "disptimeperiod: " + displaytimeperiod);
 
+
+                                // check if the user has already polled within the current display time -> set boolean value to true
+
                                 if (map.get("uid").equals(currUser) && timediff <= displaytimeperiod) {
                                     MyPreferences.setHasPolled(getApplicationContext(), true);
                                 }
+
+
+                                //store (lat,lan) and response to respective list
 
                                 lat = Double.parseDouble(map.get("lat"));
                                 lng = Double.parseDouble(map.get("lon"));
@@ -379,10 +426,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
                         Log.i("mac", "loclist: " + mylist);
                         Log.i("mac", "reslist: " + responselist);
-                        MyPreferences.setAllLatLng(getApplicationContext(), mylist); //store all latlng for timeperiod
-                        MyPreferences.setResponseList(getApplicationContext(), responselist);
+                        MyPreferences.setAllLatLng(getApplicationContext(), mylist); //save all latlng for timeperiod in sharedPreference
+                        MyPreferences.setResponseList(getApplicationContext(), responselist); ////save all response for timeperiod in sharedPreference
 
-                        //check gps status
+                        //check gps status -> if On -> start mapfragment
+                        //                       else -> display popup to turn on gps
                         displayLocationSettingsRequest(getApplicationContext());
 
                     }

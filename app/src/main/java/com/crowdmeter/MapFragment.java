@@ -89,12 +89,12 @@ public class MapFragment extends Fragment {
             R.drawable.greydot};
 
     private int drawableId;
-    private boolean isActive = false;
-    private boolean isAvailable = false;
-    Map<String, String> titlemap;
+    private boolean isActive = false;       // used when user's current location distance from last location is farther than minimumdistance.
+    private boolean isAvailable = false;      // true when there's atleast one response in user's location radius
+    Map<String, String> titlemap;       // used to store title for the question as key
     String q;
 
-    double myradius = 10;
+    double myradius = 10;            // variable that defines the radius of results to be marked with center as user location
     private String TAG = "mac";
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
@@ -120,8 +120,9 @@ public class MapFragment extends Fragment {
             currUser = firebaseAuth.getCurrentUser().getUid();
         }
 
-        titlemap = MyPreferences.getTitle(getContext());
-        q = MyPreferences.getPollQues(getContext());
+
+        titlemap = MyPreferences.getTitle(getContext());                    //get title map stored locally
+        q = MyPreferences.getPollQues(getContext());                        // get the question that was selected when user pressed a tile
 
         myDialog = new Dialog(Objects.requireNonNull(getContext()));
         progressDialog = new ProgressDialog(getContext());
@@ -133,11 +134,15 @@ public class MapFragment extends Fragment {
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
 
-        mc = (MapController) mapView.getController();
-        mc.setZoom(18);
+        mc = (MapController) mapView.getController();                                    //initialise map controller
+        mc.setZoom(18);                                                                  // set map zoom levels
 
         Log.i("mac","mapfragment");
 
+
+        // if user's current location is not stored then get the location first and then proceed
+        // else first retreive values according to user's last known location and start getlocation in background.
+        // if new location is farther than minimum location -> update the values according to the new location
 
         if (MyPreferences.getLat(getContext()) == null) {
 
@@ -160,6 +165,9 @@ public class MapFragment extends Fragment {
     }
 
 
+
+    // Set the question in top bar, and when clicked showpopup with options
+
     private void setPollQues() {
         mapQuesText.setText(MyPreferences.getPollQues(getContext()));
         cardView.setOnClickListener(new View.OnClickListener() {
@@ -171,6 +179,9 @@ public class MapFragment extends Fragment {
             }
         });
     }
+
+
+    // gets location based on network provider and store it locally and call getValues() to plot the results
 
     private void singleShotLocation(){
         progressDialog.setMessage("Getting location");
@@ -196,6 +207,9 @@ public class MapFragment extends Fragment {
     }
 
 
+
+    // gets location if user is moving -> update the change in location -> if new location is greater than minimumdistance -> retreive the values and plot it again
+
     private void getLocation() {
 
         locationManager = (LocationManager) Objects.requireNonNull(getActivity()).getSystemService(Context.LOCATION_SERVICE);
@@ -211,16 +225,16 @@ public class MapFragment extends Fragment {
                 MyPreferences.setLon(getContext(), String.valueOf(location.getLongitude()));
 
                 try {
-                    enableMyLocationOverlay();
+                    enableMyLocationOverlay();  //shows user current location on map
 
                     boolean b = checkMinimumDistance(location.getLatitude(), location.getLongitude());
                     if (b) {
-                        isActive = true;
+                        isActive = true;            //set true to plot the new values
                     }
 
                     if (isActive) {
-                        mapView.getOverlayManager().clear();
-                        getValues();
+                        mapView.getOverlayManager().clear();    // when true clear the old plots from map
+                        getValues();                            // and plot the new values
                         isActive = false;
 
                     }
@@ -256,6 +270,8 @@ public class MapFragment extends Fragment {
     }
 
 
+    //check minimum distance from last location to update the map plots
+
     private boolean checkMinimumDistance(double lat,double lon) {
         if(MyPreferences.getLat(getContext())!=null){
             double currlat = Double.parseDouble(MyPreferences.getLat(getContext()));
@@ -268,22 +284,33 @@ public class MapFragment extends Fragment {
     }
 
 
+    //gets the lat-lon and responses from sharedPref stored when getDatabaseValues was called and plot it on map
+
     private void getValues() {
+
+        //get user's last known lat and lon
+
         double currlat = Double.parseDouble(MyPreferences.getLat(getContext()));
         double currlon = Double.parseDouble(MyPreferences.getLon(getContext()));
-        mc.animateTo(new GeoPoint(currlat, currlon));
+        mc.animateTo(new GeoPoint(currlat, currlon));  //move the map to that locatiokn
 
+        //retreive all the lat-lon and response values stored in sharedPref
         List<LatLng> loclist = MyPreferences.getAllLatLng(getContext());
         List<String> reslist = MyPreferences.getResponseList(getContext());
 
         List<String> Optionslist = MyPreferences.getOptionsList(getContext());
-        map = new HashMap<>();
+        map = new HashMap<>();                                  // key - option value and value - int which will be used to plot the coloured dot
 
-        map.put(Optionslist.get(0), 0);
+        map.put(Optionslist.get(0), 0);             // for first option select red dot hence 0th position in array.
 
         for (int j = 1; j < Optionslist.size(); j++) {
-            map.put(Optionslist.get(j), (j % resId.length));
+            map.put(Optionslist.get(j), (j % resId.length));        // assign the coloured dots for each option
         }
+
+
+
+        //calc distance from the lat-lon retreived from database to user's current location
+        // if greater than myradius ignore else plot it on map
 
 
         if (loclist != null) {
@@ -298,6 +325,9 @@ public class MapFragment extends Fragment {
             }
         }
 
+
+        // display messages accordingly
+
         if (!isAvailable) {
             Toast.makeText(mContext, "No information available in your area", Toast.LENGTH_SHORT).show();
         } else {
@@ -307,11 +337,14 @@ public class MapFragment extends Fragment {
         }
     }
 
+
+    // used to put marker or plot the point
+
     public void addMarker(GeoPoint center, int drawId, String title) {
         // mc.animateTo(center);
         int mydrawid;
         if (MyPreferences.getPollQues(getContext()).equals("Is it raining today?")) {
-            mydrawid = R.drawable.raindrops;
+            mydrawid = R.drawable.raindrops;            // manually assigning rain symbol instead of dot
         } else if (drawId == 0) {
             mydrawid = R.drawable.reddot;
         } else {
@@ -328,12 +361,18 @@ public class MapFragment extends Fragment {
     }
 
 
+    // used to show user's current location by OSM
+
     private void enableMyLocationOverlay() {
         myLocationNewOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(Objects.requireNonNull(getContext())), mapView);
         myLocationNewOverlay.enableMyLocation();
         mapView.getOverlays().add(myLocationNewOverlay);
     }
 
+
+
+
+    //pop up window showed when clicked on top question bar
 
     private void showPopUp() {
         TextView textclose;
@@ -365,12 +404,18 @@ public class MapFragment extends Fragment {
 
         LayoutInflater inflater = (LayoutInflater) Objects.requireNonNull(getActivity()).getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
+
+        // retrieve question and its all options from shared Pref
+
         map = MyPreferences.getAllPolls(getContext());
         Options = map.get(MyPreferences.getPollQues(getContext()));
         MyPreferences.setOptionssList(getContext(), Options);
 
 
         pollQuestion.setText(MyPreferences.getPollQues(getContext()));
+
+
+        //dynamically add poll options and change its color when clicked
 
         for (int i = 0; i < Options.size(); i++) {
             final View rowView = Objects.requireNonNull(inflater).inflate(R.layout.rowoptions, null);
@@ -384,8 +429,8 @@ public class MapFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     b.setBackground(ContextCompat.getDrawable(Objects.requireNonNull(getContext()), R.drawable.border_colored));
-                    String chosenOption = b.getText().toString();
-                    MyPreferences.setChosenOption(getContext(), chosenOption);
+                    String chosenOption = b.getText().toString();               // used to store user's selected option
+                    MyPreferences.setChosenOption(getContext(), chosenOption);    // store it in sharedPref
 
                     for (int j = 1; j < pollLayout.getChildCount(); j++) {
                         try {
@@ -406,6 +451,9 @@ public class MapFragment extends Fragment {
             pollLayout.addView(rowView, pollLayout.getChildCount());
         }
 
+
+
+        // when submit button is clicked check whether the user has already polled within 15 min period, if not store on firebase else show toast
 
         submitPoll.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -436,6 +484,8 @@ public class MapFragment extends Fragment {
                         progressDialog.setCancelable(false);
                         progressDialog.show();
 
+
+                        // put all the values to be stored on firebase for each response
                         Map<String, Object> map = new HashMap<>();
                         map.put("timestamp", ServerValue.TIMESTAMP);
                         map.put("lat", MyPreferences.getLat(getContext()));
@@ -445,10 +495,15 @@ public class MapFragment extends Fragment {
 
                         MyPreferences.setChosenOption(getContext(), chosenOption);
 
+
+                        //get a unique key for each response
+
                         String key = mDatabase.child("PollResults")
                                 .child(MyPreferences.getPollQues(getContext()))
                                 .child(date).push().getKey();
 
+
+                        //if key is not null, push the values on firebase under that unique key
                         if (key != null) {
 
                             mDatabase.child("PollResults")

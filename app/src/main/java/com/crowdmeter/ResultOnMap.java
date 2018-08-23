@@ -69,6 +69,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+
+
+
+/*
+   This file is not in use as all the things were converted and transferred to mapfragment, recheck its usage and delete if safe
+ */
+
+
 public class ResultOnMap extends AppCompatActivity {
 
     private MapView mapView;

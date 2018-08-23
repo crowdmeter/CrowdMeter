@@ -37,6 +37,7 @@ public class MyPreferences {
     }
 
 
+    // get and setPollQues stores current question for the tile which is selected when user clicks one of the tiles.
     public static String getPollQues(Context cont){
         createSharedPref(cont);
         return sp.getString("MyCODE", null);
@@ -48,6 +49,8 @@ public class MyPreferences {
         spe.apply();
     }
 
+
+    // set and getHasPolled to check whether a user has already polled or not
     public static boolean getHasPolled(Context cont){
         createSharedPref(cont);
         return sp.getBoolean("isPolled", false);
@@ -59,6 +62,7 @@ public class MyPreferences {
         spe.apply();
     }
 
+    // when a new poll is added -> set true to retreive the new tiles
     public static boolean getisNewPoll(Context cont){
         createSharedPref(cont);
         return sp.getBoolean("newpoll", false);
@@ -69,6 +73,9 @@ public class MyPreferences {
         spe.putBoolean("newpoll", id);
         spe.apply();
     }
+
+
+    // stores all the options for any question
 
     public static List<String> getOptionsList(Context cont){
         createSharedPref(cont);
@@ -91,6 +98,9 @@ public class MyPreferences {
     }
 
 
+
+    // store pollquestion as key and its respective options as values
+
     public static Map<String,List<String>> getAllPolls(Context cont){
         createSharedPref(cont);
         Gson gson = new Gson();
@@ -112,6 +122,7 @@ public class MyPreferences {
     }
 
 
+    // stores pollquestion as key and title as value
     public static Map<String,String> getTitle(Context cont){
         createSharedPref(cont);
         Gson gson = new Gson();
@@ -139,6 +150,7 @@ public class MyPreferences {
     }
 
 
+    //store user's current latitude
     public static String getLat(Context cont){
         createSharedPref(cont);
         return sp.getString("latitude", null);
@@ -151,6 +163,8 @@ public class MyPreferences {
         spe.apply();
     }
 
+
+    //store user's current longitude
     public static String getLon(Context cont){
         createSharedPref(cont);
         return sp.getString("longitude", null);
@@ -165,6 +179,7 @@ public class MyPreferences {
 
 
 
+    // store all lat-lon values for any poll question after retrieval from firebase
     public static List<LatLng> getAllLatLng(Context cont){
         createSharedPref(cont);
         Gson gson = new Gson();
@@ -188,6 +203,7 @@ public class MyPreferences {
     }
 
 
+    // store all the responses(yes or no) for any question after retrieval from firebase
     public static List<String> getResponseList(Context cont){
         createSharedPref(cont);
         Gson gson = new Gson();
@@ -209,6 +225,9 @@ public class MyPreferences {
         spe.apply();
     }
 
+
+    // store user's chosen option when casting a vote
+
     public static String getChosenOption(Context cont){
         createSharedPref(cont);
         return sp.getString("myopt", null);
@@ -221,6 +240,8 @@ public class MyPreferences {
     }
 
 
+
+    // store title list of all questions
     public static List<String> getTitleList(Context cont){
         createSharedPref(cont);
         Gson gson = new Gson();
